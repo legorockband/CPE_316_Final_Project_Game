@@ -19,6 +19,10 @@
 /* Includes ------------------------------------------------------------------*/
 #include "main.h"
 #include "LCD.h"
+#include "Level.h"
+#include <string.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 ADC_HandleTypeDef hadc1;
 
@@ -35,23 +39,35 @@ static void MX_DAC1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
 
+
 int main(void)
 {
+	char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
+	// H is the home command
+	char CursorHome[] = { 0x1B, '[' , 'H' , 0 }; 	// Home the cursor
+	char hide_cursor_cmd[] = {0x1B, '[', '?', '2', '5', 'l', 0}; // ESC[?25l
 
-  HAL_Init();
+	HAL_Init();
 
-  SystemClock_Config();
+	SystemClock_Config();
 
-  MX_GPIO_Init();
-  MX_ADC1_Init();
-  MX_DAC1_Init();
-  MX_TIM2_Init();
-  MX_USART2_UART_Init();
+	MX_GPIO_Init();
+	MX_ADC1_Init();
+	MX_DAC1_Init();
+	MX_TIM2_Init();
+	MX_USART2_UART_Init();
 
-  while (1)
-  {
+	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)hide_cursor_cmd, strlen(hide_cursor_cmd), HAL_MAX_DELAY);
 
-  }
+	boarder();
+
+
+	while (1)
+	{
+
+	}
 }
 
 /**
