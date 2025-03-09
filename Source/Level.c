@@ -4,33 +4,16 @@
  *  Created on: Mar 1, 2025
  *      Author: pokem
  */
-
-
-/*
- * Level.c
- *
- *  Created on: Mar 1, 2025
- *      Author: pokem
- */
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "main.h"
+#include "Level.h"
+#include "Terminal.h"
 
-char boarder_char[] = {0XA9, 0};
+char boarder_char[2] = {0XA9, 0};
 
 extern UART_HandleTypeDef huart2;
-
-void UART_send(UART_HandleTypeDef *huart, char buffer[])
-{
-    HAL_UART_Transmit(huart, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);
-}
-
-/* USER CODE BEGIN 0 */
-void UART_send_newline(UART_HandleTypeDef *huart)
-{
-      HAL_UART_Transmit(huart, (uint8_t *)"\n\r", 2, HAL_MAX_DELAY);
-}
 
 void boarder(void){
 	int y,x,n;

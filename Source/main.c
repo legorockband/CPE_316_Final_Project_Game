@@ -20,6 +20,8 @@
 #include "main.h"
 #include "LCD.h"
 #include "Level.h"
+#include "Terminal.h"
+#include "Player.h"
 #include <string.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -39,6 +41,11 @@ static void MX_DAC1_Init(void);
 static void MX_TIM2_Init(void);
 static void MX_USART2_UART_Init(void);
 
+void readAndSendJoystickValues();
+
+// Position for the player to start at
+uint8_t x_pos = 78;
+uint8_t y_pos = 27;
 
 int main(void)
 {
@@ -63,13 +70,14 @@ int main(void)
 
 	boarder();
 
+	createPlayer(x_pos,y_pos);
 
 	while (1)
 	{
-
+		updatePlayer();
+//		HAL_Delay(500);
 	}
 }
-
 /**
   * @brief System Clock Configuration
   * @retval None
