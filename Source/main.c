@@ -76,8 +76,23 @@ int main(void)
 	{
 		updatePlayer();
 //		HAL_Delay(500);
+
+//		uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
+//
+//		uint32_t yValue = readADC(&hadc1, ADC_CHANNEL_6); // Y-axis on ADC1_IN6
+//
+//		char Goto[10];
+//		snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
+//		UART_send(&huart2, Goto);
+//
+//		// TODO: Change ADC pins to see if there is an error in that
+//
+//	    char msg[40];
+//	    sprintf(msg, "X: %lu, Y: %lu", xValue, yValue);
+//	    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 	}
 }
+
 /**
   * @brief System Clock Configuration
   * @retval None

@@ -50,7 +50,7 @@ void createPlayer(uint8_t x, uint8_t y){
 }
 
 void goto_send(uint8_t x, uint8_t y, char *player_ascii){
-	char Goto[10];
+	char Goto[12];
 	// Position for Person
 	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", y, x); // Format cursor position string
 	UART_send(&huart2, Goto);
@@ -60,48 +60,61 @@ void goto_send(uint8_t x, uint8_t y, char *player_ascii){
 }
 
 void updatePlayer(){
-    // Get the x and y values for the joy stick
+	// Get the x and y values for the joy stick
 	uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
+
     uint32_t yValue = readADC(&hadc1, ADC_CHANNEL_6); // Y-axis on ADC1_IN6
 
 	char Goto[10];
-	// Position for Body
 	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
 	UART_send(&huart2, Goto);
 
+	// TODO: Change ADC pins to see if there is an error in that
+
     char msg[40];
-    sprintf(msg, "X: %lu, Y: %lu\r\n", xValue, yValue);
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), 10);
+    sprintf(msg, "X: %lu, Y: %lu", xValue, yValue);
+    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+
 
     // Get range for joy stick and x/y acceptable range
-
     // Neutral Position
-    if (2020 < xValue && xValue < 2080 && 2770 < yValue && yValue < 2820) {
+    if (2020 < xValue && xValue < 2080 && 2750 < yValue && yValue < 2820) {
     	createPlayer(x,y);
     }
     // Right Position
-    else if (0 <= xValue && xValue < 1600 && 1200 < yValue) {
-        x++;
+    else if (0 <= xValue && xValue < 1600 && 1200 < yValue
+    		&& ((x+2) <= 156)) {							// Check if the right arm is touching the right boarder, if it is, don't move right
+    	x++;
     	createPlayer(x,y);
     }
     // Left Position
-    else if (1600 <= xValue && xValue < 4095 && 1200 < yValue) {
-        x--;
+    else if (1600 <= xValue && xValue < 4095 && 1200 < yValue
+    		&& ((x-2) >= 3)) {
+    	x--;
     	createPlayer(x,y);
     }
     // Up Position
     else if (yValue < 2750 && 1950 < xValue && xValue < 2050) {
-        y--;
+    	y--;
     	createPlayer(x,y);
     }
     // Down Position
     else if (yValue > 2850 && 1950 < xValue && xValue < 2050) {
-        y++;
+    	y++;
     	createPlayer(x, y);
+    }
+
+    if( ((x+2) >= 156) || ((x-2) <= 3) ||	// If the right side or left side of the person is touching or beyond the wall don't move him
+    	((y+2) >= 55)  || ((y-2) <= 2)){		// If bottom or top of person is touching or beyond the boarder, don't move
+
+    	createPlayer(x,y);
     }
 
     HAL_Delay(80);
     clearPlayer(x,y);
+}
+
+void collisionCheck(){
 
 }
 
