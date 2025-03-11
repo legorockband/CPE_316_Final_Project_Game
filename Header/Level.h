@@ -23,6 +23,5 @@ SCOPE void key(void);
 SCOPE void door(void);
 SCOPE void enemy(void);
 
-
 #undef SCOPE
 #endif /* INC_LEVEL_H_ */

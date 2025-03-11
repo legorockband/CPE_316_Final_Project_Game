@@ -15,9 +15,8 @@
 #endif
 
 SCOPE void createPlayer(uint8_t, uint8_t);
-SCOPE void updatePlayer();
+SCOPE void updatePlayer(void);
 SCOPE void clearPlayer(uint8_t, uint8_t);
-SCOPE void goto_send(uint8_t, uint8_t, char*);
 SCOPE uint32_t readADC(ADC_HandleTypeDef*, uint32_t);
 
 #undef SCOPE

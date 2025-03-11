@@ -49,16 +49,6 @@ void createPlayer(uint8_t x, uint8_t y){
 	goto_send(x+1, y+1, player_ascii[3]);
 }
 
-void goto_send(uint8_t x, uint8_t y, char *player_ascii){
-	char Goto[12];
-	// Position for Person
-	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", y, x); // Format cursor position string
-	UART_send(&huart2, Goto);
-
-	// Send an Body to the center of the screen
-	UART_send(&huart2, player_ascii);
-}
-
 void updatePlayer(){
 	// Get the x and y values for the joy stick
 	uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
@@ -114,10 +104,6 @@ void updatePlayer(){
     clearPlayer(x,y);
 }
 
-void collisionCheck(){
-
-}
-
 void clearPlayer(uint8_t x, uint8_t y){
 	// Clear the previous body
 	goto_send(x, y, player_ascii[5]);
@@ -135,25 +121,31 @@ void clearPlayer(uint8_t x, uint8_t y){
 
 uint32_t readADC(ADC_HandleTypeDef* hadc, uint32_t channel) {
     ADC_ChannelConfTypeDef sConfig = {0};
-
     sConfig.Channel = channel;
     sConfig.Rank = ADC_REGULAR_RANK_1;
-    sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5; // Increased sampling time
+    sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;
 
-    // Configure ADC channel
     HAL_ADC_ConfigChannel(hadc, &sConfig);
 
     // Start ADC conversion
     HAL_ADC_Start(hadc);
 
     // Poll for ADC conversion completion
-    HAL_ADC_PollForConversion(hadc, HAL_MAX_DELAY);
+    if (HAL_ADC_PollForConversion(hadc, 10) == HAL_OK) {
+        // Check for overrun and clear flag if set
+        if (__HAL_ADC_GET_FLAG(hadc, ADC_FLAG_OVR)) {
+            __HAL_ADC_CLEAR_FLAG(hadc, ADC_FLAG_OVR);
+        }
 
-    // Read the ADC value and mask to 12 bits
-    uint32_t value = HAL_ADC_GetValue(hadc) & 0x0FFF;
+        // Read the ADC value and mask to 12 bits
+        uint32_t value = HAL_ADC_GetValue(hadc) & 0x0FFF;
 
-    // Stop ADC
+        // Stop ADC
+        HAL_ADC_Stop(hadc);
+
+        return value;
+    }
+
     HAL_ADC_Stop(hadc);
-
-    return value;
+    return 0; // Return 0 if ADC conversion failed
 }

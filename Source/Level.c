@@ -13,6 +13,13 @@
 
 char boarder_char[2] = {0XA9, 0};
 
+char key_ascii[3][2] =
+{
+		{0x4F, 0},		// O, Key Handle
+		{0x2D, 0},		// -
+		{0x7C, 0}		// |
+};
+
 extern UART_HandleTypeDef huart2;
 
 void boarder(void){
@@ -68,19 +75,27 @@ void boarder(void){
 
 void stage1(void){
 	boarder();
-
+	key();
 }
 
 
 void key(void){
+	/*
+	O--		Art for key character
+	 ||
+	*/
 
+	uint8_t x = 30;
+	uint8_t y = 30;
 
-
+	goto_send(x, y, key_ascii[1]); 		// Create the first part of the shaft
+	goto_send(x+1, y , key_ascii[1]);	// Create the second part of the shaft
+	goto_send(x-1, y, key_ascii[0]);	// Create the handle
+	goto_send(x,y+1, key_ascii[2]);		// Create first tooth
+	goto_send(x+1, y+1, key_ascii[2]);	// Create second tooth
 }
 
 void door(void){
-
-
 
 
 

@@ -68,7 +68,7 @@ int main(void)
 	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)hide_cursor_cmd, strlen(hide_cursor_cmd), HAL_MAX_DELAY);
 
-	boarder();
+	stage1();
 
 	createPlayer(x_pos,y_pos);
 
