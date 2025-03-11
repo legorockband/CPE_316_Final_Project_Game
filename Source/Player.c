@@ -149,3 +149,12 @@ uint32_t readADC(ADC_HandleTypeDef* hadc, uint32_t channel) {
     HAL_ADC_Stop(hadc);
     return 0; // Return 0 if ADC conversion failed
 }
+
+uint8_t* getPlayerPos(){
+	static uint8_t pos[2];
+	pos[0] = x;
+	pos[1] = y;
+	return pos;
+}
+
+

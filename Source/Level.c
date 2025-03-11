@@ -10,9 +10,19 @@
 #include "main.h"
 #include "Level.h"
 #include "Terminal.h"
+#include "Player.h"
 
-uint8_t x_lock = 40;
-uint8_t y_lock = 40;
+uint8_t x_lock_pos = 40;
+uint8_t y_lock_pos = 40;
+
+uint8_t all_key_pos[3][2] = {
+		{30, 30},				// Stage 1 Key Position
+		{30, 30},				// Stage 2 Key Position
+		{30, 30}				// Stage 3 Key Position
+};
+
+
+uint8_t currentStage = 0;
 
 char boarder_char[2] = {0XA9, 0};
 
@@ -94,19 +104,17 @@ void title(void){
 }
 
 void stage1(void){
+	currentStage = 1;
 	boarder();
-	key();
-	lock();
+	key(all_key_pos[1][0], all_key_pos[1][1]);
+	lock(x_lock_pos, y_lock_pos);
 }
 
-void key(void){
+void key(uint8_t x, uint8_t y){
 	/*
 	O--		Art for key character
 	 ||
 	*/
-
-	uint8_t x = 30;
-	uint8_t y = 30;
 
 	goto_send(x, y, key_ascii[1]); 		// Create the first part of the shaft
 	goto_send(x+1, y , key_ascii[1]);	// Create the second part of the shaft
@@ -115,7 +123,21 @@ void key(void){
 	goto_send(x+1, y+1, key_ascii[2]);	// Create second tooth
 }
 
-void lock(void){
+void checkPlayerPos(){
+	// If the player is on the key, give them the key and allow the door to open
+	// TODO: Change the collect area of the key
+	// TODO: Might need to change how these are compared
+	if(getPlayerPos() == getKeyPos()){
+
+	}
+
+	// This is skeleton for door logic
+//	else if(getPlayerPos() == getLockPos()){
+//
+//	}
+}
+
+void lock(uint8_t x_lock, uint8_t y_lock){
 	/*
 	   __
 	 _/__\_
@@ -156,5 +178,14 @@ void lock(void){
 	goto_send(x_lock+2, y_lock+2, lock_ascii[0]);	// Bottom "_"
 	goto_send(x_lock+3, y_lock+2, lock_ascii[5]);	// Bottom Right "|"
 
-
 }
+
+uint8_t* getKeyPos(){
+	static uint8_t pos[2];
+	pos[0] = all_key_pos[currentStage][0];		// Get the x value of the key in the current stage
+	pos[1] = all_key_pos[currentStage][1];		// Get the y value of the key in the current stage
+	return pos;
+}
+
+
+
