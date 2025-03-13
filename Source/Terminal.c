@@ -11,8 +11,6 @@
 #include "main.h"
 #include "Terminal.h"
 
-extern UART_HandleTypeDef huart2;
-
 void UART_send(UART_HandleTypeDef *huart, char buffer[])
 {
     HAL_UART_Transmit(huart, (uint8_t *)buffer, strlen(buffer), HAL_MAX_DELAY);

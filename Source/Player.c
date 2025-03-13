@@ -12,7 +12,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-extern UART_HandleTypeDef huart2;
 extern ADC_HandleTypeDef hadc1;
 
 // Position for the player to start at
@@ -30,97 +29,89 @@ char player_ascii[6][2] =
 	};
 
 void createPlayer(uint8_t x, uint8_t y){
-	// Go to center of screen and print Body
-	goto_send(x,y,player_ascii[1]);
-
-	// Go to head position and print head
-	goto_send(x,y-1,player_ascii[0]);
-
-	// Print left arm
-	goto_send(x+1, y, player_ascii[2]);
-
-	// Print right arm
-	goto_send(x-1, y, player_ascii[2]);
-
-	// Print left leg
-	goto_send(x-1, y+1, player_ascii[4]);
-
-	// Print left leg
-	goto_send(x+1, y+1, player_ascii[3]);
+	goto_send(x,y,player_ascii[1]);			// Print body
+	goto_send(x,y-1,player_ascii[0]);		// Print head
+	goto_send(x+1, y, player_ascii[2]);		// Print left arm
+	goto_send(x-1, y, player_ascii[2]);		// Print right arm
+	goto_send(x-1, y+1, player_ascii[4]);	// Print left leg
+	goto_send(x+1, y+1, player_ascii[3]);	// Print left leg
 }
 
 void updatePlayer(){
+
+	// The Values for y are slightly off
 	// Get the x and y values for the joy stick
 	uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
-
     uint32_t yValue = readADC(&hadc1, ADC_CHANNEL_6); // Y-axis on ADC1_IN6
 
 	char Goto[10];
 	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
 	UART_send(&huart2, Goto);
 
-	// TODO: Change ADC pins to see if there is an error in that
-
-    char msg[40];
-    sprintf(msg, "X: %lu, Y: %lu", xValue, yValue);
+    // Display the analog stick values on the screen
+    char msg[40] = {0};
+    sprintf(msg, "X: %lu, Y: %lu \r\n", xValue, yValue);
     HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
-
-    // Get range for joy stick and x/y acceptable range
+    // TODO: Edit ranges for joy stick for good ranges
     // Neutral Position
-    if (2020 < xValue && xValue < 2080 && 2750 < yValue && yValue < 2820) {
+    if ((2020 < xValue && xValue < 2080) &&
+    	(2750 < yValue && yValue < 2820)) {
     	createPlayer(x,y);
     }
     // Right Position
-    else if (0 <= xValue && xValue < 1600 && 1200 < yValue
-    		&& ((x+2) <= 156)) {							// Check if the right arm is touching the right boarder, if it is, don't move right
+    else if ((0 <= xValue && xValue < 1600) &&
+    		(1200 < yValue) &&
+    		((x+2) <= 156)) {							// Check if the right arm is touching the right boarder, if it is, don't move
     	x++;
     	createPlayer(x,y);
     }
     // Left Position
-    else if (1600 <= xValue && xValue < 4095 && 1200 < yValue
-    		&& ((x-2) >= 3)) {
+    else if ((1600 <= xValue && xValue < 4095) &&
+    		(1200 < yValue) &&
+    		((x-2) >= 3)) {								// Check if the left arm is touching the left boarder, if it is, don't move
     	x--;
     	createPlayer(x,y);
     }
     // Up Position
-    else if (yValue < 2750 && 1950 < xValue && xValue < 2050) {
+    else if ((yValue < 2750) &&
+    		(1950 < xValue && xValue < 2050) &&
+			((y-2) >= 2)) {								// Check if the head is touching the top boarder, if it is, don't move
     	y--;
     	createPlayer(x,y);
     }
     // Down Position
-    else if (yValue > 2850 && 1950 < xValue && xValue < 2050) {
+    else if ((0 < yValue && yValue < 1200) &&
+    		(1950 < xValue && xValue < 4095) &&
+    		((y+2) <= 47)) {							// Check if the legs are touching the bottom boarder, if it is, don't move
     	y++;
     	createPlayer(x, y);
     }
 
-    if( ((x+2) >= 156) || ((x-2) <= 3) ||	// If the right side or left side of the person is touching or beyond the wall don't move him
-    	((y+2) >= 55)  || ((y-2) <= 2)){		// If bottom or top of person is touching or beyond the boarder, don't move
+    // TODO: Change collision logic so that when the character is near the character
+    if( ((x+2) >= 156) || ((x-2) <= 3) ||		// If the right side or left side of the person is touching or beyond the wall redraw at the same position continuously
+    	((y+2) >= 47)  || ((y-2) <= 2)){		// If bottom or top of person is touching or beyond the boarder, redraw at the same position continuously
 
     	createPlayer(x,y);
     }
 
+    // This delay is added for movement speed to be reasonable
     HAL_Delay(80);
     clearPlayer(x,y);
 }
 
 void clearPlayer(uint8_t x, uint8_t y){
-	// Clear the previous body
-	goto_send(x, y, player_ascii[5]);
-	// Clear the previous head
-	goto_send(x, y-1, player_ascii[5]);
-	// Clear the previous left arm
-	goto_send(x+1, y, player_ascii[5]);
-	// Clear the previous right arm
-	goto_send(x-1, y, player_ascii[5]);
-	// Clear the previous left leg
-	goto_send(x-1, y+1, player_ascii[5]);
-	// Clear the previous right leg
-	goto_send(x+1, y+1, player_ascii[5]);
+	goto_send(x, y, player_ascii[5]);	  // Clear the previous body
+	goto_send(x, y-1, player_ascii[5]);   // Clear the previous head
+	goto_send(x+1, y, player_ascii[5]);   // Clear the previous left arm
+	goto_send(x-1, y, player_ascii[5]);   // Clear the previous right arm
+	goto_send(x-1, y+1, player_ascii[5]); // Clear the previous left leg
+	goto_send(x+1, y+1, player_ascii[5]); // Clear the previous right leg
 }
 
 uint32_t readADC(ADC_HandleTypeDef* hadc, uint32_t channel) {
-    ADC_ChannelConfTypeDef sConfig = {0};
+    // Get the correct channel configs for the specific ADC channel
+	ADC_ChannelConfTypeDef sConfig = {0};
     sConfig.Channel = channel;
     sConfig.Rank = ADC_REGULAR_RANK_1;
     sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;

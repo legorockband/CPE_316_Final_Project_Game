@@ -43,8 +43,6 @@ char lock_ascii[6][2]=
 		{0x7C, 0}		// "|"
 };
 
-extern UART_HandleTypeDef huart2;
-
 void boarder(void){
 	int y,x,n;
 
@@ -108,6 +106,10 @@ void stage1(void){
 	boarder();
 	key(all_key_pos[1][0], all_key_pos[1][1]);
 	lock(x_lock_pos, y_lock_pos);
+}
+
+void stage2(){
+
 }
 
 void key(uint8_t x, uint8_t y){

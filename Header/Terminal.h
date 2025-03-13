@@ -14,6 +14,8 @@
    #define SCOPE extern
 #endif
 
+SCOPE UART_HandleTypeDef huart2;
+
 SCOPE void UART_send(UART_HandleTypeDef*, char*);
 SCOPE void UART_send_newline(UART_HandleTypeDef*);
 
