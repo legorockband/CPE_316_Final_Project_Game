@@ -44,49 +44,54 @@ void updatePlayer(){
 	uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
     uint32_t yValue = readADC(&hadc1, ADC_CHANNEL_6); // Y-axis on ADC1_IN6
 
-	char Goto[10];
-	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
-	UART_send(&huart2, Goto);
-
-    // Display the analog stick values on the screen
-    char msg[40] = {0};
-    sprintf(msg, "X: %lu, Y: %lu \r\n", xValue, yValue);
-    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
+//	char Goto[10];
+//	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
+//	UART_send(&huart2, Goto);
+//
+//    // Display the analog stick values on the screen
+//    char msg[40] = {0};
+//    sprintf(msg, "X: %lu, Y: %lu \r\n", xValue, yValue);
+//    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
 
     // TODO: Edit ranges for joy stick for good ranges
     // Neutral Position
-    if ((2020 < xValue && xValue < 2080) &&
-    	(2750 < yValue && yValue < 2820)) {
+    if ((3170 < xValue && xValue < 3200) &&
+    	(3090 < yValue && yValue < 3130)) {
     	createPlayer(x,y);
     }
     // Right Position
-    else if ((0 <= xValue && xValue < 1600) &&
-    		(1200 < yValue) &&
+    else if ((0 <= xValue && xValue <= 500) &&
+    		(0 <= yValue && yValue <= 4095) &&
     		((x+2) <= 156)) {							// Check if the right arm is touching the right boarder, if it is, don't move
     	x++;
     	createPlayer(x,y);
     }
-    // Left Position
-    else if ((1600 <= xValue && xValue < 4095) &&
-    		(1200 < yValue) &&
-    		((x-2) >= 3)) {								// Check if the left arm is touching the left boarder, if it is, don't move
-    	x--;
-    	createPlayer(x,y);
-    }
     // Up Position
-    else if ((yValue < 2750) &&
-    		(1950 < xValue && xValue < 2050) &&
-			((y-2) >= 2)) {								// Check if the head is touching the top boarder, if it is, don't move
+    else if ((0 <= xValue && xValue <= 4095) &&
+    		(2925 < yValue && yValue <= 4095) &&
+			((y-2) >= 2)
+			) {								// Check if the head is touching the top boarder, if it is, don't move
     	y--;
     	createPlayer(x,y);
     }
+
     // Down Position
-    else if ((0 < yValue && yValue < 1200) &&
-    		(1950 < xValue && xValue < 4095) &&
+    else if ((0 <= xValue && xValue <= 4095)  &&
+    		(0 == yValue) &&
     		((y+2) <= 47)) {							// Check if the legs are touching the bottom boarder, if it is, don't move
     	y++;
     	createPlayer(x, y);
     }
+
+    // Left Position
+    else if ((2940 <= xValue && xValue <= 4095) &&
+    		(0 <= yValue && yValue <= 4095) &&
+    		((x-2) >= 3)) {								// Check if the left arm is touching the left boarder, if it is, don't move
+    	x--;
+    	createPlayer(x,y);
+    }
+
+
 
     // TODO: Change collision logic so that when the character is near the character
     if( ((x+2) >= 156) || ((x-2) <= 3) ||		// If the right side or left side of the person is touching or beyond the wall redraw at the same position continuously
@@ -113,8 +118,11 @@ uint32_t readADC(ADC_HandleTypeDef* hadc, uint32_t channel) {
     // Get the correct channel configs for the specific ADC channel
 	ADC_ChannelConfTypeDef sConfig = {0};
     sConfig.Channel = channel;
-    sConfig.Rank = ADC_REGULAR_RANK_1;
+   	sConfig.Rank = ADC_REGULAR_RANK_1;
     sConfig.SamplingTime = ADC_SAMPLETIME_47CYCLES_5;
+    sConfig.SingleDiff = ADC_SINGLE_ENDED;
+    sConfig.OffsetNumber = ADC_OFFSET_NONE;
+    sConfig.Offset = 0;
 
     HAL_ADC_ConfigChannel(hadc, &sConfig);
 
