@@ -12,8 +12,6 @@
 #include "Terminal.h"
 #include "Player.h"
 
-uint8_t x_lock_pos = 40;
-uint8_t y_lock_pos = 40;
 
 uint8_t all_key_pos[3][2] = {
 		{70, 27},				// Stage 1 Key Position
@@ -23,7 +21,7 @@ uint8_t all_key_pos[3][2] = {
 
 uint8_t all_lock_pos[3][2] = {
 		{40, 40},				// Stage 1 Lock
-		{40, 40},				// Stage 2 Lock
+		{15, 32},				// Stage 2 Lock
 		{40, 40}				// Stage 3 Lock
 };
 
@@ -112,6 +110,23 @@ void boarder(void){
 	}
 }
 
+void makewall(uint8_t x_start, uint8_t y_start, uint8_t length, char direction) {
+    for (uint8_t i = 0; i < length; i++) {
+        uint8_t x = x_start;
+        uint8_t y = y_start;
+        // always start from 3 to account for 2 walls on x-axis
+        // always start from 1 to account for 1 walls on y-axis
+        switch (direction) {
+            case 'L': x = x_start - i; break; // Move left
+            case 'R': x = x_start + i; break; // Move right
+            case 'U': y = y_start - i; break; // Move up
+            case 'D': y = y_start + i; break; // Move down
+            default: return;
+        }
+        goto_send(x, y, boarder_char);
+    }
+}
+
 void title(void){
 
 	//TODO: Create a title for the top of the screen using the ASCII text generator
@@ -124,9 +139,16 @@ void stage1(void){
 	lock(all_lock_pos[0][0], all_lock_pos[0][1], lock_ascii_art);
 }
 
-void stage2(){
-
+void stage2(void) {
+    currentStage = 1;
+    boarder();
+    key(all_key_pos[1][0], all_key_pos[1][1]);
+    lock(all_lock_pos[1][0], all_lock_pos[1][1]);
+    makewall(30, 32, 12, 'L');  // Up works(how far over[x],how far down[y],how many  )
+    makewall(30, 32, 19, 'D');  // Left works
+    makewall(3,32,10,'R');
 }
+
 
 void key(uint8_t x, uint8_t y, char key_ascii[][2]){
 	/*

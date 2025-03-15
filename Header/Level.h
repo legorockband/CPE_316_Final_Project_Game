@@ -21,7 +21,7 @@ SCOPE void title(void);
 SCOPE void stage1(void);
 SCOPE void stage2(void);
 SCOPE void stage3(void);
-
+SCOPE void makewall(uint8_t x_start, uint8_t y_start, uint8_t length, char direction);
 SCOPE void key(uint8_t, uint8_t, char[][2]);
 SCOPE void lock(uint8_t, uint8_t, char[][2]);
 SCOPE void enemy(void);
