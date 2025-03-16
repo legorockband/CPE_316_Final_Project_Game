@@ -12,10 +12,16 @@
 #include "Terminal.h"
 #include "Player.h"
 
+#define MAX_WALLS 100
+
+Wall walls[MAX_WALLS];
+uint8_t total_walls = 0;
+
+void (*stages[3])(void) = {stage1, stage2, stage3};
 
 uint8_t all_key_pos[3][2] = {
 		{70, 27},				// Stage 1 Key Position
-		{30, 30},				// Stage 2 Key Position
+		{145, 5},				// Stage 2 Key Position
 		{30, 30}				// Stage 3 Key Position
 };
 
@@ -123,8 +129,62 @@ void makewall(uint8_t x_start, uint8_t y_start, uint8_t length, char direction) 
             case 'D': y = y_start + i; break; // Move down
             default: return;
         }
+
+        if (total_walls < MAX_WALLS) {
+            walls[total_walls].x = x;
+            walls[total_walls].y = y;
+            total_walls++;
+        }
+
         goto_send(x, y, boarder_char);
     }
+}
+
+bool* wallCollision(){
+	uint8_t* playerPos = getPlayerPos();
+    uint8_t player_x = playerPos[0];
+    uint8_t player_y = playerPos[1];
+
+    // Set an array of bool values to false for each direction
+    static bool wallCheck[4] = {false, false, false, false};		// [0] is Left, [1] is Right, [2] is Up, [3] is Down
+
+    // Reset wallColl[] each time it's called
+    for (int i = 0; i < 4; i++) {
+    	wallCheck[i] = false;
+    }
+
+    // Check each position with all of the possible walls compared to the players position
+    for (uint8_t i = 0; i < total_walls; i++) {
+        if (walls[i].x == player_x - 2 &&
+           (walls[i].y == player_y || walls[i].y == player_y - 1 || walls[i].y == player_y + 1)) {
+        	wallCheck[0] = true;	// Left wall has collision
+        }
+        if ((walls[i].x == player_x + 2) &&
+            (walls[i].y == player_y || walls[i].y == player_y - 1 || walls[i].y == player_y + 1)) {
+        	wallCheck[1] = true;	// Right wall has collision
+        }
+        if ((walls[i].x == player_x || walls[i].x == player_x - 1 || walls[i].x == player_x + 1) &&
+        	(walls[i].y == player_y - 2)) {
+        	wallCheck[2] = true;	// Up wall has collision
+        }
+        if ((walls[i].x == player_x || walls[i].x == player_x - 1 || walls[i].x == player_x + 1) &&
+        	(walls[i].y == player_y + 2)) {
+        	wallCheck[3] = true;	// Down wall has collision
+        }
+    }
+
+    return wallCheck;
+}
+
+void resetWalls(){
+	// Reset the wall positions
+	for (uint8_t i = 0; i < total_walls; i++){
+		walls[i].x = 0;
+		walls[i].y = 0;
+	}
+
+	// Reset the total number of walls
+	total_walls = 0;
 }
 
 void title(void){
@@ -140,15 +200,21 @@ void stage1(void){
 }
 
 void stage2(void) {
-    currentStage = 1;
-    boarder();
-    key(all_key_pos[1][0], all_key_pos[1][1]);
-    lock(all_lock_pos[1][0], all_lock_pos[1][1]);
+	currentStage = 2;
+	boarder();
+    key(all_key_pos[1][0], all_key_pos[1][1], key_ascii_art);
+    lock(all_lock_pos[1][0], all_lock_pos[1][1], lock_ascii_art);
     makewall(30, 32, 12, 'L');  // Up works(how far over[x],how far down[y],how many  )
     makewall(30, 32, 19, 'D');  // Left works
-    makewall(3,32,10,'R');
+    makewall(3,  32, 10, 'R');
 }
 
+void stage3(void){
+	currentStage = 3;
+	boarder();
+	resetWalls();
+
+}
 
 void key(uint8_t x, uint8_t y, char key_ascii[][2]){
 	/*
@@ -218,8 +284,6 @@ void lock(uint8_t x_lock, uint8_t y_lock, char lock_ascii[][2]){
 
 void checkPlayerPos(){
 	// If the player is on the key, give them the key and allow the door to open
-	// TODO: Change the collect area of the key
-	// TODO: Might need to change how these are compared
 	uint8_t* playerPosition = getPlayerPos();				// Get the player's position, index 0 is the x value, index 1 is the y value
 	uint8_t* keyPosition = getKeyPos();						// Get the key's position, index 0 is the x value, index 1 is the y value
 	uint8_t* lockPosition = getLockPos();					// Get the lock's position, index 0 is the x value, index 1 is the y value
@@ -230,17 +294,32 @@ void checkPlayerPos(){
 	bool xOverlapLock = isOverlapping(playerPosition[0],lockPosition[0], 1, 3);	// Checks if the x values are in a range of 3 (person) and 7 (key) since a lock is 7x5
 	bool yOverlapLock = isOverlapping(playerPosition[1],lockPosition[1], 1, 2);	// Checks if the x values are in a range of 3 (person) and 5 (key) since a key is 7x5
 
-
-	if(xOverlapKey && yOverlapKey && (gotKey == 0)){
+	// If the player is over a key, pick up the key
+	if(xOverlapKey && yOverlapKey){
         goto_send(60, 10, "Key Got");
         key(keyPosition[0], keyPosition[1], clear_ascii_art);		// Clear the key
         gotKey = 1;					// The player has a key
 	}
 
+    // If the player is at the lock but doesn't have the key, prevent entry
+    else if (xOverlapLock && yOverlapLock && (gotKey == 0)) {
+        goto_send(60, 11, "Need a key!");
+    }
+
+	// If you are on top of the lock with the key, go to the next stage
 	else if(xOverlapLock && yOverlapLock && (gotKey == 1)){
+		char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
+		char CursorHome[] = { 0x1B, '[' , 'H' , 0 }; 	// Home the cursor
 		goto_send(60, 11, "Lock Open");
         lock(lockPosition[0], lockPosition[1], clear_ascii_art);	// Clear the lock
         gotKey = 0;
+
+        currentStage++;		// Go to the next stage
+
+    	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
+    	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
+
+        stages[currentStage - 1]();			// Draw the next stage
 	}
 
 }
@@ -262,6 +341,10 @@ uint8_t* getLockPos(){
 	pos[0] = all_lock_pos[currentStage - 1][0];		// Get the x value of the lock in the current stage
 	pos[1] = all_lock_pos[currentStage - 1][1];		// Get the y value of the lock in the current stage
 	return pos;
+}
+
+uint8_t getKeyStatus(){
+	return gotKey;
 }
 
 

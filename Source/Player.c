@@ -7,6 +7,7 @@
 
 #include "main.h"
 #include "Terminal.h"
+#include "Level.h"
 #include "Player.h"
 #include <string.h>
 #include <stdio.h>
@@ -37,39 +38,54 @@ void createPlayer(uint8_t x, uint8_t y){
 	goto_send(x+1, y+1, player_ascii[3]);	// Print left leg
 }
 
+//TODO: Lock overlap doesn't work yet
 void updatePlayer(){
+	bool* wallColl = wallCollision();
 
-	// The Values for y are slightly off
+	uint8_t* lockPosition = getLockPos();
+	uint8_t* playerPosition = getPlayerPos();
+
+	// Extended the range of the person, so if the outer part is touching the lock, then don't do anything
+	bool xOverlapLock = isOverlapping(playerPosition[0],lockPosition[0], 1, 4);	// If the x values are in a range of 3 (person) and 9 (key) (extra area around)
+	bool yOverlapLock = isOverlapping(playerPosition[1],lockPosition[1], 1, 3);	// If the x values are in a range of 3 (person) and 7 (key) (extra area around)
+
+//  // Print debug info to check the wall position relative to the player
+//  char debug[50];
+//  sprintf(debug, "Walls: L-%d R-%d U-%d D-%d", wallColl[0], wallColl[1], wallColl[2], wallColl[3]);
+//  goto_send(10, 17, debug);
+
+//	char playerPos[20];
+//	sprintf(playerPos, "Pos: %d,%d\n", x, y);
+//	goto_send(10, 10, playerPos);
+
+	// The values for y are slightly off
 	// Get the x and y values for the joy stick
 	uint32_t xValue = readADC(&hadc1, ADC_CHANNEL_5); // X-axis on ADC1_IN5
     uint32_t yValue = readADC(&hadc1, ADC_CHANNEL_6); // Y-axis on ADC1_IN6
 
-//	char Goto[10];
-//	snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", 20, 20); // Format cursor position string
-//	UART_send(&huart2, Goto);
-//
-//    // Display the analog stick values on the screen
-//    char msg[40] = {0};
-//    sprintf(msg, "X: %lu, Y: %lu \r\n", xValue, yValue);
-//    HAL_UART_Transmit(&huart2, (uint8_t*)msg, strlen(msg), HAL_MAX_DELAY);
-
     // TODO: Edit ranges for joy stick for good ranges
     // Neutral Position
-    if ((3170 < xValue && xValue < 3200) &&
-    	(3090 < yValue && yValue < 3130)) {
+    if ((3100 < xValue && xValue < 3300) &&
+    	(3000 < yValue && yValue < 3200)) {
     	createPlayer(x,y);
     }
+
     // Right Position
     else if ((0 <= xValue && xValue <= 500) &&
     		(0 <= yValue && yValue <= 4095) &&
-    		((x+2) <= 156)) {							// Check if the right arm is touching the right boarder, if it is, don't move
+    		((x+2) <= 156) && 						// Check if the right arm is touching the right boarder, if it is, don't move
+			(wallColl[1] == false) &&
+			(!xOverlapLock && !yOverlapLock)
+			) {
     	x++;
     	createPlayer(x,y);
     }
     // Up Position
     else if ((0 <= xValue && xValue <= 4095) &&
     		(2925 < yValue && yValue <= 4095) &&
-			((y-2) >= 2)
+			((y-2) >= 2) &&
+			(wallColl[2] == false) &&
+			(!xOverlapLock && !yOverlapLock)
 			) {								// Check if the head is touching the top boarder, if it is, don't move
     	y--;
     	createPlayer(x,y);
@@ -78,7 +94,10 @@ void updatePlayer(){
     // Down Position
     else if ((0 <= xValue && xValue <= 4095)  &&
     		(0 == yValue) &&
-    		((y+2) <= 47)) {							// Check if the legs are touching the bottom boarder, if it is, don't move
+    		((y+2) <= 47) &&
+			(wallColl[3] == false) &&
+			(!xOverlapLock && !yOverlapLock)
+			) {							// Check if the legs are touching the bottom boarder, if it is, don't move
     	y++;
     	createPlayer(x, y);
     }
@@ -86,15 +105,25 @@ void updatePlayer(){
     // Left Position
     else if ((2940 <= xValue && xValue <= 4095) &&
     		(0 <= yValue && yValue <= 4095) &&
-    		((x-2) >= 3)) {								// Check if the left arm is touching the left boarder, if it is, don't move
+    		((x-2) >= 3) &&
+			(wallColl[0] == false) &&
+			(!xOverlapLock && !yOverlapLock)
+			) {								// Check if the left arm is touching the left boarder, if it is, don't move
     	x--;
     	createPlayer(x,y);
     }
 
+    // Prevent movement if the player is at the lock without the key
+    if (xOverlapLock && yOverlapLock && (getKeyStatus() == 0)) {
+        goto_send(10, 11, "Need a key!");
+        createPlayer(x, y);  					// Redraw player to block movement
+    }
 
+    if(wallColl[0] || wallColl[1] || wallColl[2] || wallColl[3] ){
+    	createPlayer(x,y);
+    }
 
-    // TODO: Change collision logic so that when the character is near the character
-    if( ((x+2) >= 156) || ((x-2) <= 3) ||		// If the right side or left side of the person is touching or beyond the wall redraw at the same position continuously
+    if( ((x+2) >= 156) || ((x-2) <= 3) ||		// If the right side or left side of the person is touching the wall redraw at the same position continuously
     	((y+2) >= 47)  || ((y-2) <= 2)){		// If bottom or top of person is touching or beyond the boarder, redraw at the same position continuously
 
     	createPlayer(x,y);

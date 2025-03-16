@@ -18,6 +18,7 @@
 
 SCOPE void createPlayer(uint8_t, uint8_t);
 SCOPE void updatePlayer(void);
+SCOPE void checkPlayerPos(void);
 SCOPE void clearPlayer(uint8_t, uint8_t);
 SCOPE uint8_t* getPlayerPos(void);
 SCOPE uint32_t readADC(ADC_HandleTypeDef*, uint32_t);

@@ -48,6 +48,8 @@ void readAndSendJoystickValues();
 uint8_t x_pos = 78;
 uint8_t y_pos = 27;
 
+char Buffer[1];
+
 int main(void)
 {
 	char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
@@ -65,11 +67,13 @@ int main(void)
 	MX_TIM2_Init();
 	MX_USART2_UART_Init();
 
+	//HAL_UART_Receive_IT(&huart2, (uint8_t *)Buffer, 1);  // UART interrupt starts
+
 	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)hide_cursor_cmd, strlen(hide_cursor_cmd), HAL_MAX_DELAY);
 
-	stage1();
+	stage2();
 
 	createPlayer(x_pos,y_pos);
 
@@ -77,6 +81,8 @@ int main(void)
 	{
 		updatePlayer();
 		checkPlayerPos();
+		//checkInvalidPos();
+
 	}
 }
 
