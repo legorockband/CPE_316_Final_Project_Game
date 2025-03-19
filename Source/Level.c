@@ -140,6 +140,17 @@ void makewall(uint8_t x_start, uint8_t y_start, uint8_t length, char direction) 
     }
 }
 
+void resetWalls(){
+	// Reset the wall positions
+	for (uint8_t i = 0; i < total_walls; i++){
+		walls[i].x = 0;
+		walls[i].y = 0;
+	}
+
+	// Reset the total number of walls
+	total_walls = 0;
+}
+
 bool* wallCollision(){
 	uint8_t* playerPos = getPlayerPos();
     uint8_t player_x = playerPos[0];
@@ -176,15 +187,57 @@ bool* wallCollision(){
     return wallCheck;
 }
 
-void resetWalls(){
-	// Reset the wall positions
-	for (uint8_t i = 0; i < total_walls; i++){
-		walls[i].x = 0;
-		walls[i].y = 0;
-	}
+bool* lockCollision(uint8_t stage){
+	uint8_t* playerPos = getPlayerPos();
+    uint8_t player_x = playerPos[0];
+    uint8_t player_y = playerPos[1];
 
-	// Reset the total number of walls
-	total_walls = 0;
+    // Set an array of bool values to false for each direction
+    static bool lockCheck[4] = {false, false, false, false};		// [0] is Left, [1] is Right, [2] is Up, [3] is Down
+
+    // Reset lockColl[] each time it's called
+    for (int i = 0; i < 4; i++) {
+    	lockCheck[i] = false;
+    }
+
+    // Get current lock position based on the current stage
+    uint8_t lock_x = all_lock_pos[stage - 1][0];
+    uint8_t lock_y = all_lock_pos[stage - 1][1];
+
+    // Define lock boundaries
+    uint8_t lock_left = lock_x - 4;
+    uint8_t lock_right = lock_x + 4;
+    uint8_t lock_top = lock_y - 3;
+    uint8_t lock_bottom = lock_y + 3;
+
+    // Left of Lock collision, Player’s right side touches lock’s left side
+    if ((player_x + 1 == lock_left) &&
+        (player_y + 1 >= lock_top && player_y - 1 <= lock_bottom)) {
+        lockCheck[1] = true;
+    }
+    // Right of Lock collision – Player’s left side touches lock’s right side
+    if (player_x - 1 == lock_right  &&
+        (player_y + 1 >= lock_top && player_y - 1 <= lock_bottom)) {
+        lockCheck[0] = true;
+    }
+
+    // Top of Lock collision – Player’s top side touches lock’s bottom side
+    if (player_y + 1 == lock_top &&
+        (player_x >= lock_left && player_x <= lock_right)) {
+        lockCheck[3] = true;
+    }
+
+    // Bottom of lock collision – Player’s bottom side touches lock’s top side
+    if (player_y - 1 == lock_bottom  &&
+        (player_x >= lock_left && player_x <= lock_right)) {
+        lockCheck[2] = true;
+    }
+
+	char debug[50];
+	sprintf(debug, "Lock: L-%d R-%d U-%d D-%d", lockCheck[0], lockCheck[1], lockCheck[2], lockCheck[3]);
+	goto_send(10, 17, debug);
+
+    return lockCheck;
 }
 
 void title(void){
@@ -206,7 +259,7 @@ void stage2(void) {
     lock(all_lock_pos[1][0], all_lock_pos[1][1], lock_ascii_art);
     makewall(30, 32, 12, 'L');  // Up works(how far over[x],how far down[y],how many  )
     makewall(30, 32, 19, 'D');  // Left works
-    makewall(3,  32, 10, 'R');
+    makewall(3,  32, 9, 'R');
 }
 
 void stage3(void){
@@ -301,11 +354,6 @@ void checkPlayerPos(){
         gotKey = 1;					// The player has a key
 	}
 
-    // If the player is at the lock but doesn't have the key, prevent entry
-    else if (xOverlapLock && yOverlapLock && (gotKey == 0)) {
-        goto_send(60, 11, "Need a key!");
-    }
-
 	// If you are on top of the lock with the key, go to the next stage
 	else if(xOverlapLock && yOverlapLock && (gotKey == 1)){
 		char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
@@ -321,7 +369,6 @@ void checkPlayerPos(){
 
         stages[currentStage - 1]();			// Draw the next stage
 	}
-
 }
 
 bool isOverlapping(uint8_t playerPos, uint8_t itemPos, uint8_t playerRange, uint8_t itemRange) {
@@ -345,6 +392,10 @@ uint8_t* getLockPos(){
 
 uint8_t getKeyStatus(){
 	return gotKey;
+}
+
+uint8_t getCurrentStage(){
+	return currentStage;
 }
 
 

@@ -44,14 +44,16 @@ static void MX_USART2_UART_Init(void);
 
 void readAndSendJoystickValues();
 
-// Position for the player to start at
-uint8_t x_pos = 78;
-uint8_t y_pos = 27;
-
 char Buffer[1];
 
 int main(void)
 {
+	// Position for the player to start at
+	uint8_t* playerPos = getPlayerPos();
+
+	uint8_t x_pos = playerPos[0];
+	uint8_t y_pos = playerPos[1];
+
 	char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
 	// H is the home command
 	char CursorHome[] = { 0x1B, '[' , 'H' , 0 }; 	// Home the cursor
@@ -333,8 +335,8 @@ static void MX_USART2_UART_Init(void)
 static void MX_GPIO_Init(void)
 {
   GPIO_InitTypeDef GPIO_InitStruct = {0};
-/* USER CODE BEGIN MX_GPIO_Init_1 */
-/* USER CODE END MX_GPIO_Init_1 */
+  /* USER CODE BEGIN MX_GPIO_Init_1 */
+  /* USER CODE END MX_GPIO_Init_1 */
 
   /* GPIO Ports Clock Enable */
   __HAL_RCC_GPIOA_CLK_ENABLE();
@@ -360,8 +362,8 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-/* USER CODE BEGIN MX_GPIO_Init_2 */
-/* USER CODE END MX_GPIO_Init_2 */
+  /* USER CODE BEGIN MX_GPIO_Init_2 */
+  /* USER CODE END MX_GPIO_Init_2 */
 }
 
 /* USER CODE BEGIN 4 */

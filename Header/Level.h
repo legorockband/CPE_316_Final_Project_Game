@@ -32,12 +32,17 @@ SCOPE bool* wallCollision(void);
 SCOPE void resetWalls(void);
 
 SCOPE void key(uint8_t, uint8_t, char[][2]);
+
 SCOPE void lock(uint8_t, uint8_t, char[][2]);
+SCOPE bool* lockCollision(uint8_t);
+
 SCOPE void enemy(void);
 
 SCOPE uint8_t* getKeyPos(void);
 SCOPE uint8_t getKeyStatus(void);
 SCOPE uint8_t* getLockPos(void);
+SCOPE uint8_t getCurrentStage(void);
+
 SCOPE bool checkInvalidPos(void);
 SCOPE bool isOverlapping(uint8_t , uint8_t , uint8_t , uint8_t );
 
