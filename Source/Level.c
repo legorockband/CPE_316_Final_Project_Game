@@ -66,6 +66,81 @@ char key_ascii_art[4][2] =
 		{0x5F, 0}		// "_"
 };
 
+char k_ascii[6][9][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  _  __  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " | |/ /  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | ' /   "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x3C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  <    "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x2E,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | . \   "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}, {0x20,0}}   // " |_|\_\  "
+};
+
+
+
+char e_ascii[6][9][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  ______  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},  // " |  ____| "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // " | |____  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},  // " |  ____| "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // " | |_____ "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}}   // " |______| "
+};
+
+char y_ascii[6][9][2] = {
+    {{0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "__   __ "
+    {{0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}},  // "\ \ / / "
+    {{0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " \ V /  "
+    {{0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  \ /   "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   | |  "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // "   |_|  "
+};
+
+char m_ascii[5][13][2] = {
+    {{0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}},  // "__       __ "
+    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x7C,0}},  // "|  \     /  |"
+    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}},  // "| | \   / | |"
+    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}},  // "| |  \_/  | |"
+    {{0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}}   // "|_|       |_|"
+};
+
+
+
+char a_ascii[5][11][2] = {
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "     _    "
+    {{0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "    / \   "
+    {{0x20,0}, {0x2F,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   / _ \  "
+    {{0x2F,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  / ___ \ "
+    {{0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // " /_/   \_\"
+};
+
+char s_ascii[6][11][2] = {
+    {{0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   _____   "
+    {{0x20,0}, {0x2F,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  / ____|  "
+    {{0x7C,0}, {0x20,0}, {0x28,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | (_____  "
+    {{0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  \_____ \ "
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  _____) | "
+    {{0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // " |______/  "
+};
+
+char t_ascii[6][8][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  _____  "
+    {{0x7C,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},  // " |_   _| "
+    {{0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   | |   "
+    {{0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   | |   "
+    {{0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   | |   "
+    {{0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // "   |_|   "
+};
+
+char r_ascii[6][10][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  _____   "
+    {{0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  __ \  "
+    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | |__) | "
+    {{0x7C,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  _  /  "
+    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | | \ \  "
+    {{0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}, {0x20,0}}   // " |_|  \_\ "
+};
+
+
 void boarder(void){
 	int y,x,n;
 
@@ -398,5 +473,90 @@ uint8_t getCurrentStage(){
 	return currentStage;
 }
 
+void title(uint8_t x_title, uint8_t y_title) {
+    // Print "K"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 0; col < 9; col++) {
+            goto_send(x_title + 50 + col, y_title - 10 + row, k_ascii[row][col]);
+        }
+    }
 
+    // Print "E"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 0; col < 9; col++) {
+            goto_send(x_title + 58 + col, y_title - 10 + row, e_ascii[row][col]);
+        }
+    }
+
+    // Print "Y"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 0; col < 9; col++) {
+            goto_send(x_title + 67 + col, y_title - 10 + row, y_ascii[row][col]);
+        }
+    }
+
+    // Print "M"
+    for (uint8_t row = 0; row < 5; row++) {
+        for (uint8_t col = 0; col < 13; col++) {
+            goto_send(x_title + 76 + col, y_title - 9 + row, m_ascii[row][col]);
+        }
+    }
+
+    // Print "A"
+    for (uint8_t row = 0; row < 5; row++) {
+        for (uint8_t col = 11; col < 22; col++) {
+            goto_send(x_title + 79 + col, y_title - 9 + row, a_ascii[row][col - 11]);
+        }
+    }
+
+    // Print "S"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 22; col < 33; col++) {
+            goto_send(x_title + 76 + col, y_title - 10 + row, s_ascii[row][col - 22]);
+        }
+    }
+
+    // Print "T"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 33; col < 41; col++) {
+            goto_send(x_title + 74 + col, y_title - 10 + row, t_ascii[row][col - 33]);
+        }
+    }
+
+    // Print "E"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 41; col < 50; col++) {
+            goto_send(x_title + 72 + col, y_title - 10 + row, e_ascii[row][col - 41]);
+        }
+    }
+
+    // Print "R"
+    for (uint8_t row = 0; row < 6; row++) {
+        for (uint8_t col = 50; col < 58; col++) {
+            goto_send(x_title + 72 + col, y_title - 10 + row, r_ascii[row][col - 50]);
+        }
+    }
+    // Description text
+    char *description[] = {
+        "In Key Master, players must collect all the visible keys",
+        "scattered across each level to unlock the exit and advance.",
+        "while the keys are in plain sight, reaching them won't be easy—",
+        "players must navigate tricky platforming sections, dodge enemies,",
+        "and solve environmental challenges to progress.",
+        "Each level introduces new mechanics, from moving platforms",
+        "to dangerous traps, requiring skill and quick thinking.",
+        "Can you grab all the keys and make it to the final level?"
+    };
+
+    uint8_t desc_x = x_title + 59;  // Adjust position based on the title width
+    uint8_t desc_y = y_title - 2;   // Place the description just below the title
+
+    // Print each line of the description below the title
+    for (uint8_t i = 0; i < 8; i++) {
+        char Goto[10];
+        snprintf(Goto, sizeof(Goto), "\x1B[%d;%dH", desc_y + i, desc_x);
+        UART_send(&huart2, Goto);
+        UART_send(&huart2, description[i]);
+    }
+}
 
