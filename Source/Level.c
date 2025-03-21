@@ -20,10 +20,12 @@ uint16_t total_walls = 0;
 uint8_t currentStage = 0;
 uint8_t gotKey = 0;
 uint8_t gotFakeKey = 0;
+bool fakeLockActive = false;
+
 bool skipKey = false;
 bool activateTrap = false;
 
-void (*stages[3])(void) = {stage1, stage2, stage3};
+void (*stages[4])(void) = {stage1, stage2, stage3, congrats};
 
 uint8_t all_key_pos[4][2] = {
 		{145, 5},				// Stage 1 Key
@@ -39,9 +41,9 @@ uint8_t all_fake_key[3][2] = {
 };
 
 uint8_t all_lock_pos[3][2] = {
-		{15, 32},				// Stage 1 Lock
-		{10, 30},				// Stage 2 Lock
-		{145, 25}				// Stage 3 Lock
+		{15,  32},				// Stage 1 Lock
+		{10,  30},				// Stage 2 Lock
+		{143, 23}				// Stage 3 Lock
 };
 
 char boarder_char[2] = {0XA9, 0};
@@ -75,42 +77,40 @@ char key_ascii_art[4][2] =
 		{0x5F, 0}		// "_"
 };
 
-char k_ascii[6][9][2] = {
-    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  _  __  "
-    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " | |/ /  "
-    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | ' /   "
-    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x3C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  <    "
-    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x2E,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | . \   "
-    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}, {0x20,0}}   // " |_|\_\  "
+char k_ascii[6][10][2] = {
+    {{0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  _   __  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " | | / /  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | |/ /   "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | |\ \   "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}},  // " | | \ \  "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}}   // " |_|  \_\ "
 };
-
-
 
 char e_ascii[6][9][2] = {
     {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "  ______  "
     {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},  // " |  ____| "
     {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // " | |____  "
     {{0x20,0}, {0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},  // " |  ____| "
-    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // " | |_____ "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // " | |_____ "
     {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}}   // " |______| "
 };
 
-char y_ascii[6][9][2] = {
-    {{0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},  // "__   __ "
-    {{0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}},  // "\ \ / / "
-    {{0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " \ V /  "
-    {{0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  \ /   "
-    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  | |   "
-    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // "  |_|   "
+char y_ascii[6][10][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}},  // " __   __ "
+    {{0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}},  // " \ \ / / "
+    {{0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // "  \ V /  "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   \ /   "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   | |   "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // "   |_|   "
 };
 
-char m_ascii[6][15][2] = {
-    {{0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}},  // "____       ____"
-    {{0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}},  // "|   \     /   |"
-    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x7C,0}, {0x20,0}, {0x7C,0}},  // "| |\ \   / /| |"
-    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}},  // "| | \ \_/ / | |"
-	{{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}},  // "| |  \___/  | |"
-	{{0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}}   // "|_|         |_|"
+char m_ascii[6][17][2] = {
+    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}},  // " ____       ____ "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}},  // " |   \     /   | "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},  // " | |\ \   / /| | "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},  // " | | \ \_/ / | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},  // " | |  \___/  | | "
+	{{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}}   // " |_|         |_| "
 };
 
 
@@ -125,12 +125,12 @@ char a_ascii[6][13][2] = {
 };
 
 char s_ascii[6][11][2] = {
-    {{0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   _____   "
-    {{0x20,0}, {0x2F,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  / ____|  "
-    {{0x7C,0}, {0x20,0}, {0x28,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | (_____  "
-    {{0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  \_____ \ "
-    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  _____) | "
-    {{0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // " |______/  "
+    {{0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "   _____   "
+    {{0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}},  // "  / ____|  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x28,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | (_____  "
+    {{0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}},  // "  \_____ \ "
+    {{0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}},  // "  _____) | "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}}   // " |______/  "
 };
 
 char t_ascii[6][8][2] = {
@@ -143,12 +143,48 @@ char t_ascii[6][8][2] = {
 };
 
 char r_ascii[6][10][2] = {
-    {{0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  _____   "
-    {{0x7C,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  __ \  "
-    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | |__) | "
-    {{0x7C,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " |  _  /  "
-    {{0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // " | | \ \  "
-    {{0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}, {0x20,0}}   // " |_|  \_\ "
+    {{0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}},  // "  _____   "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}},  // " |  __ \  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x29,0}, {0x20,0}, {0x7C,0}, {0x20,0}},  // " | |__) | "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x2F,0}, {0x20,0}, {0x20,0}},  // " |  _  /  "
+    {{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}},  // " | | \ \  "
+    {{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5C,0}, {0x20,0}}   // " |_|  \_\ "
+};
+
+char h_ascii[6][11][2]= {
+	{{0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}},	// "  _     _  "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |___| | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " |  ___  | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7c,0}, {0x5F,0}, {0x7C,0}, {0x20,0}}  // " |_|   |_| "
+};
+
+char n_ascii[6][11][2] = {
+	{{0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x20,0}},	// " __     __ "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | \   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " |  \  | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5C,0}, {0x5C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | |\\ | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x5C,0}, {0x5C,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | | \\| | "
+	{{0x20,0}, {0x7C,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},	// " |_|  \__| "
+};
+
+char u_ascii[6][11][2] = {
+	{{0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x20,0}, {0x20,0}}, // "  _     _  "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}}, // " | |   | | "
+	{{0x20,0}, {0x5C,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x2F,0}, {0x20,0}}, // " \ \___/ / "
+	{{0x20,0}, {0x20,0}, {0x5C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x2F,0}, {0x20,0}, {0x20,0}}, // "  \_____/  "
+};
+
+char o_ascii[6][11][2] = {
+	{{0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}},	// "  _______  "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " |  ___  | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x20,0}, {0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | |   | | "
+	{{0x20,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}, {0x7C,0}, {0x20,0}},	// " | |___| | "
+	{{0x20,0}, {0x7C,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x5F,0}, {0x7C,0}, {0x20,0}},	// " |_______| "
 };
 
 void border(void){
@@ -368,10 +404,10 @@ void stage3(void){
     lock(all_lock_pos[2][0], all_lock_pos[2][1], lock_ascii_art);
 }
 
-//void stage4(){
-//	curretnStage = 4;
-//
-//}
+void congrats(){
+	currentStage = 4;
+	thankYou(30,20);
+}
 
 void key(uint8_t x, uint8_t y, char key_ascii[][2]){
 	/*
@@ -530,10 +566,10 @@ void checkPlayerPos(){
 	bool xOverlapFakeLock = isOverlapping(playerPosition[0],29, 1, 3);	// Checks if the x values are in a range of 3 (person) and 7 (key) since a lock is 7x5
 	bool yOverlapFakeLock = isOverlapping(playerPosition[1],13, 1, 2);	// Checks if the x values are in a range of 3 (person) and 5 (key) since a key is 7x5
 
-	if(gotFakeKey == 3){
+	if(gotFakeKey == 3 && fakeLockActive == false){
 		goto_send(5,5, "Did those keys do anything?");
 		fakeLock(29, 13, lock_ascii_art);
-		gotFakeKey = 0;
+		fakeLockActive = true;
 	}
 
 	// If the player is over a key, pick up the key
@@ -579,7 +615,7 @@ void checkPlayerPos(){
         stages[currentStage - 1]();			// Draw the next stage
 	}
 
-	else if(xOverlapFakeLock && yOverlapFakeLock && currentStage == 3){
+	else if(xOverlapFakeLock && yOverlapFakeLock && currentStage == 3 && gotFakeKey == 3){
 		goto_send(5,6, "Well it seems like those keys did nothing");
 		fakeLock(29, 13, clear_ascii_art);
 	}
@@ -704,67 +740,155 @@ uint8_t getCurrentStage(){
 	return currentStage;
 }
 
+void thankYou(uint8_t x, uint8_t y){
+	uint8_t letter_offset[9] = {8, 11, 13, 11, 10, 11, 10, 11, 11};	// 0 = T, 1 = H, 2 = A, 3 = N, 4 = K, 5 = " ", 6 = Y, 7 = O, 8 = U
+	uint8_t total_offset = 0;
+
+	// Print "T"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[0]; col ++){
+			goto_send(x + col + total_offset, y + row, t_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[0];
+
+	//Print "H"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[1]; col ++){
+			goto_send(x + col + total_offset, y + row, h_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[1];
+
+	//Print "A"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[2]; col ++){
+			goto_send(x + col + total_offset, y + row, a_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[2];
+
+	//Print "N"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[3]; col ++){
+			goto_send(x + col + total_offset, y + row, n_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[3];
+
+	//Print "K"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[4]; col ++){
+			goto_send(x + col + total_offset, y + row, k_ascii[row][col]);
+		}
+	}
+	// K and Space offset
+	total_offset += letter_offset[4] + letter_offset[5];
+
+	//Print "Y"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[6]; col ++){
+			goto_send(x + col + total_offset, y + row, y_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[6];
+
+	//Print "O"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[7]; col ++){
+			goto_send(x + col + total_offset, y + row, o_ascii[row][col]);
+		}
+	}
+	total_offset += letter_offset[7];
+
+	//Print "U"
+	for(uint8_t row = 0; row < 6; row++){
+		for(uint8_t col = 0; col < letter_offset[8]; col ++){
+			goto_send(x + col + total_offset, y + row, u_ascii[row][col]);
+		}
+	}
+}
+
 void title(uint8_t x_title, uint8_t y_title) {
-    // Print "K"
+	uint8_t letter_offset[9] = {10, 9, 10, 17, 13, 11, 8, 9, 10};	// 0 = K, 1 = E, 2 = Y, 3 = M, 4 = A, 5 = S, 6 = T, 7 = E, 8 = R
+	uint8_t total_offset = 0;
+
+	// Print "K"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 0; col < 9; col++) {
-            goto_send(x_title + 50 + col, y_title - 10 + row, k_ascii[row][col]);
+        for (uint8_t col = 0; col < letter_offset[0]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, k_ascii[row][col]);
         }
     }
 
+    total_offset += letter_offset[0];
+
     // Print "E"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 0; col < 9; col++) {
-            goto_send(x_title + 58 + col, y_title - 10 + row, e_ascii[row][col]);
+        for (uint8_t col = 0; col < letter_offset[1]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, e_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[1];
 
     // Print "Y"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 0; col < 9; col++) {
-            goto_send(x_title + 67 + col, y_title - 10 + row, y_ascii[row][col]);
+        for (uint8_t col = 0; col < letter_offset[2]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, y_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[2];
 
     // Print "M"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 0; col < 15; col++) {
-            goto_send(x_title + 76 + col, y_title - 10 + row, m_ascii[row][col]);
+        for (uint8_t col = 0; col < letter_offset[3]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, m_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[3];
 
     // Print "A"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 15; col < 27; col++) {
-            goto_send(x_title + 76 + col, y_title - 10 + row, a_ascii[row][col - 15]);
+        for (uint8_t col = 0; col < letter_offset[4]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, a_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[4];
 
     // Print "S"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 27; col < 38; col++) {
-            goto_send(x_title + 76 + col, y_title - 10 + row, s_ascii[row][col - 27]);
+        for (uint8_t col = 0; col < letter_offset[5]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, s_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[5];
 
     // Print "T"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 38; col < 46; col++) {
-            goto_send(x_title + 74 + col, y_title - 10 + row, t_ascii[row][col - 38]);
+        for (uint8_t col = 0; col < letter_offset[6]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, t_ascii[row][col]);
         }
     }
+
+    total_offset += letter_offset[6];
 
     // Print "E"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 46; col < 55; col++) {
-            goto_send(x_title + 72 + col, y_title - 10 + row, e_ascii[row][col - 46]);
+        for (uint8_t col = 0; col < letter_offset[7]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, e_ascii[row][col]);
         }
     }
 
+    total_offset += letter_offset[7];
+
     // Print "R"
     for (uint8_t row = 0; row < 6; row++) {
-        for (uint8_t col = 55; col < 63; col++) {
-            goto_send(x_title + 72 + col, y_title - 10 + row, r_ascii[row][col - 55]);
+        for (uint8_t col = 0; col < letter_offset[8]; col++) {
+            goto_send(x_title + col + total_offset, y_title + row, r_ascii[row][col]);
         }
     }
     // Description text
@@ -779,8 +903,8 @@ void title(uint8_t x_title, uint8_t y_title) {
 
     char *createdBy = "Created By: Troy Renner and Samuel Ramirez";
 
-    uint8_t desc_x = x_title + 59;  // Adjust position based on the title width
-    uint8_t desc_y = y_title + 3;   // Place the description just below the title
+    uint8_t desc_x = x_title + 15;  // Adjust position based on the title width
+    uint8_t desc_y = y_title + 10;   // Place the description just below the title
 
     // Print each line of the description below the title
     for (uint8_t i = 0; i < 5; i++) {

@@ -23,9 +23,12 @@ typedef struct {
 
 SCOPE void border(void);
 SCOPE void title(uint8_t, uint8_t);
+SCOPE void thankYou(uint8_t, uint8_t);
+
 SCOPE void stage1(void);
 SCOPE void stage2(void);
 SCOPE void stage3(void);
+SCOPE void congrats(void);
 
 SCOPE void makewall(uint8_t x_start, uint8_t y_start, uint8_t length, char direction);
 SCOPE bool* wallCollision(void);

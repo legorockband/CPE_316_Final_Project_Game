@@ -63,14 +63,12 @@ int main(void)
 	MX_TIM2_Init();
 	MX_USART2_UART_Init();
 
-	//HAL_UART_Receive_IT(&huart2, (uint8_t *)Buffer, 1);  // UART interrupt starts
-
 	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)hide_cursor_cmd, strlen(hide_cursor_cmd), HAL_MAX_DELAY);
 
 	// Show the title screen, then after 5 seconds go to stage 1
-	title(-15,20);
+	title(30,10);
 	HAL_Delay(13000);
 	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
@@ -79,8 +77,10 @@ int main(void)
 
 	while (1)
 	{
-		updatePlayer();
-		checkPlayerPos();
+		if(getCurrentStage() != 4){
+			updatePlayer();
+			checkPlayerPos();
+		}
 	}
 }
 
