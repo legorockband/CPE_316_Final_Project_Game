@@ -21,8 +21,8 @@ typedef struct {
     uint8_t y;
 } Wall;
 
-SCOPE void boarder(void);
-SCOPE void title(void);
+SCOPE void border(void);
+SCOPE void title(uint8_t, uint8_t);
 SCOPE void stage1(void);
 SCOPE void stage2(void);
 SCOPE void stage3(void);
@@ -32,14 +32,18 @@ SCOPE bool* wallCollision(void);
 SCOPE void resetWalls(void);
 
 SCOPE void key(uint8_t, uint8_t, char[][2]);
+SCOPE void trapKey(void);
+SCOPE bool trapStatus(void);
+SCOPE void makeMaze(void);
 
 SCOPE void lock(uint8_t, uint8_t, char[][2]);
-SCOPE bool* lockCollision(uint8_t);
+SCOPE bool* lockCollision(uint8_t, uint8_t);
 
 SCOPE void enemy(void);
 
 SCOPE uint8_t* getKeyPos(void);
 SCOPE uint8_t getKeyStatus(void);
+SCOPE bool getSkipKey(void);
 SCOPE uint8_t* getLockPos(void);
 SCOPE uint8_t getCurrentStage(void);
 

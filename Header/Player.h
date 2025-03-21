@@ -17,6 +17,7 @@
 
 
 SCOPE void createPlayer(uint8_t, uint8_t);
+SCOPE void setPlayerPos(uint8_t, uint8_t);
 SCOPE void updatePlayer(void);
 SCOPE void checkPlayerPos(void);
 SCOPE void clearPlayer(uint8_t, uint8_t);

@@ -48,12 +48,6 @@ char Buffer[1];
 
 int main(void)
 {
-	// Position for the player to start at
-	uint8_t* playerPos = getPlayerPos();
-
-	uint8_t x_pos = playerPos[0];
-	uint8_t y_pos = playerPos[1];
-
 	char ClearScreen[] = { 0x1B, '[', '2' , 'J',0 }; 	// Clear the screen
 	// H is the home command
 	char CursorHome[] = { 0x1B, '[' , 'H' , 0 }; 	// Home the cursor
@@ -75,16 +69,18 @@ int main(void)
 	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
 	HAL_UART_Transmit(&huart2, (uint8_t *)hide_cursor_cmd, strlen(hide_cursor_cmd), HAL_MAX_DELAY);
 
-	stage2();
+	// Show the title screen, then after 5 seconds go to stage 1
+	title(-15,20);
+	HAL_Delay(13000);
+	HAL_UART_Transmit(&huart2, (uint8_t *)ClearScreen, strlen(ClearScreen), HAL_MAX_DELAY);
+	HAL_UART_Transmit(&huart2, (uint8_t *)CursorHome, strlen(CursorHome), HAL_MAX_DELAY);
 
-	createPlayer(x_pos,y_pos);
+	stage1();
 
 	while (1)
 	{
 		updatePlayer();
 		checkPlayerPos();
-		//checkInvalidPos();
-
 	}
 }
 
